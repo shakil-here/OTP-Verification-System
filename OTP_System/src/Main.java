@@ -185,7 +185,7 @@ public class Main {
     }
     public static int sendOTPSMS(String otp, String mobile) throws SQLException {
         String message="Your OTP Code is : "+otp;
-        String to= "88"+mobile;
+        String to= "YOUR_COUNTRY_CODE"+mobile; //like in Bangladesh country code '880'
 
         final String API_URL = "YOUR_SMS_API_URL/ENDPOINT";
         final String API_KEY = "YOUR_SMS_API_KEY";
