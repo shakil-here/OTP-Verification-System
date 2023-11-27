@@ -21,9 +21,13 @@ public class Main {
 
         String mobile;
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter Mobile Number:");
-        mobile = scanner.next();
-        LocalDate currentDate = LocalDate.now();
+   do {
+            System.out.println("Enter Mobile Number:");
+            mobile = scanner.next();
+            if (!isValidMobileNumber(mobile)) {
+                System.out.println("Invalid mobile number . Please enter a 11 digit valid mobile number.");
+            }
+        } while (!isValidMobileNumber(mobile));        LocalDate currentDate = LocalDate.now();
         LocalTime currentTime = LocalTime.now();
         try (Connection connection = DriverManager.getConnection(url, userName, password)) {
             String generatedCode;
@@ -227,5 +231,15 @@ public class Main {
             System.err.println("Error sending SMS to " + to + ": " + e.getMessage());
             return -1;
         }
+    }
+
+        private static boolean isValidMobileNumber(String mobile) {
+        // Check if the mobile number starts with "01" and has a total of 11 digits
+
+        return mobile.matches("^01\\d{9}$");
+
+        //Here 01 is 1st two digit of our country's phone number started..e.g (01XXXXXXXX)
+        //total 11 digit so without 01 rest of the number of digit 9
+        //you can set your own country formate by replaceing 01(first two or one or what matches to your country mobile number formate) and rest of the digit 9
     }
 }
