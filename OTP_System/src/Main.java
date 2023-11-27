@@ -10,11 +10,14 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
+    final static String url = "YOUR_JDBC_SERVER_HOST_LINK";
+    final  static String userName = "YOUR_USER_NAME";
+    final static String password = "YOUR_PASSWORD";
 
     public static void main(String[] args) throws SQLException {
-        final String url = "YOUR_JDBC_SERVER_HOST_LINK";
-        final String userName = "YOUR_USER_NAME";
-        final String password = "YOUR_PASSWORD";
+      
+
+      
 
         String mobile;
         Scanner scanner = new Scanner(System.in);
@@ -30,7 +33,9 @@ public class Main {
             } while (codeExists(connection, generatedCode));
 
             int smsStatus= sendOTPSMS(generatedCode,mobile);
-            if (smsStatus==1) {
+            if (smsStatus==-1){
+                System.out.println("Error to send OTP!!");
+            } else if (smsStatus==1) {
                 currentDate = LocalDate.now();
                 currentTime = LocalTime.now();
 
@@ -54,55 +59,60 @@ public class Main {
                 catch (SQLException e) {
                     e.printStackTrace();
                 }
-            }
-
-            System.out.println("Enter Your OTP:\n");
-
-            String inputedOTP = scanner.next();
-            LocalDate currentDate2 = LocalDate.now();
-            LocalTime currentTime2 = LocalTime.now();
-
-            Connection connectionq = DriverManager.getConnection(url, userName, password);
-            final String query = "SELECT id, code, date, time FROM otptable WHERE mobile ="+mobile+" ORDER BY date DESC, time DESC LIMIT 1;";
-            Statement statement = connectionq.createStatement();
-            ResultSet userResultSet = statement.executeQuery(query);
 
 
-            if (userResultSet.next()) {
-                int id = userResultSet.getInt("id");
-                String code = userResultSet.getString("code");
-                LocalDate date = userResultSet.getDate("date").toLocalDate();
-                LocalTime time = userResultSet.getTime("time").toLocalTime();
+                System.out.println("Enter Your OTP:\n");
 
-                int verificationStatus = verifyOTP(mobile, code, inputedOTP, date, time,currentDate2,currentTime2);
-                while (verificationStatus == -1) {
-                    System.out.println("Wrong OTP. Please enter again:");
-                    inputedOTP = scanner.next();
-                    verificationStatus =  verifyOTP(mobile, code, inputedOTP, date, time,currentDate2,currentTime2);
-                }
-                if (verificationStatus == 1) {
+                String inputedOTP = scanner.next();
+                LocalDate currentDate2 = LocalDate.now();
+                LocalTime currentTime2 = LocalTime.now();
+
+                Connection connectionq = DriverManager.getConnection(url, userName, password);
+                final String query = "SELECT id, code, date, time FROM otptable WHERE mobile ="+mobile+" ORDER BY date DESC, time DESC LIMIT 1;";
+                Statement statement = connectionq.createStatement();
+                ResultSet userResultSet = statement.executeQuery(query);
 
 
-                    Connection connectionin = DriverManager.getConnection(url, userName, password);
-                    final String queryin = "SELECT id FROM otptable WHERE mobile ="+mobile+";";
-                    Statement statementin = connectionin.createStatement();
-                    ResultSet userResultSetin = statementin.executeQuery(queryin);
-                    while (userResultSetin.next()){
-                        int dltId=userResultSetin.getInt("id");
-                        // System.out.println("ID :"+dltId);
-                        deleteOTP(dltId);
+                if (userResultSet.next()) {
+                    int id = userResultSet.getInt("id");
+                    String code = userResultSet.getString("code");
+                    LocalDate date = userResultSet.getDate("date").toLocalDate();
+                    LocalTime time = userResultSet.getTime("time").toLocalTime();
 
+                    int verificationStatus = verifyOTP(mobile, code, inputedOTP, date, time,currentDate2,currentTime2);
+                    while (verificationStatus == -1) {
+                        System.out.println("Wrong OTP. Please enter again:");
+                        inputedOTP = scanner.next();
+                        verificationStatus =  verifyOTP(mobile, code, inputedOTP, date, time,currentDate2,currentTime2);
                     }
-                    System.out.println("Verified");
-                } else if (verificationStatus == -1) {
-                    System.out.println("Wrong OTP");
+                    if (verificationStatus == 1) {
+
+
+                        Connection connectionin = DriverManager.getConnection(url, userName, password);
+                        final String queryin = "SELECT id FROM otptable WHERE mobile ="+mobile+";";
+                        Statement statementin = connectionin.createStatement();
+                        ResultSet userResultSetin = statementin.executeQuery(queryin);
+                        while (userResultSetin.next()){
+                            int dltId=userResultSetin.getInt("id");
+                            // System.out.println("ID :"+dltId);
+                            deleteOTP(dltId);
+
+                        }
+                        System.out.println("Verified");
+                    } else if (verificationStatus == -1) {
+                        System.out.println("Wrong OTP");
+                    } else {
+                        System.out.println("Time out !! Try Again!!");
+                        System.out.println("Generate new OTP!");
+                    }
                 } else {
-                    System.out.println("Time out !! Try Again!!");
-                    System.out.println("Generate new OTP!");
+                    System.out.println("No OTP found for the given mobile number.");
                 }
-            } else {
-                System.out.println("No OTP found for the given mobile number.");
             }
+
+
+        }catch (SQLException ex){
+            ex.printStackTrace();
         }
     }
 
@@ -128,9 +138,7 @@ public class Main {
     }
 
     private static void deleteOTP(int id) {
-        String url="jdbc:mysql://avnadmin:AVNS_8f65KgDkLWAY6bVplK7@mysql-4e2a7f2-mealmanagement.a.aivencloud.com:25728/otp?ssl-mode=REQUIRED";
-        String userName="avnadmin";
-        String password="AVNS_EQuO0Vy0a6fLcSD1DTU";
+    
         try (Connection connection = DriverManager.getConnection(url, userName, password)) {
             String deleteQuery = "DELETE FROM otptable WHERE id = ?";
             try (PreparedStatement statement = connection.prepareStatement(deleteQuery)) {
@@ -184,12 +192,15 @@ public class Main {
         return false;
     }
     public static int sendOTPSMS(String otp, String mobile) throws SQLException {
-        String message="Your OTP Code is : "+otp;
-        String to= "YOUR_COUNTRY_CODE"+mobile; //like in Bangladesh country code '880'
 
-        final String API_URL = "YOUR_SMS_API_URL/ENDPOINT";
+
+
+        final String API_URL = "YOUR_SMS_API_URL";
         final String API_KEY = "YOUR_SMS_API_KEY";
 
+        String message="Your OTP Code is : "+otp;
+        String to= "YOUR_COUNTRY_CODE"+mobile; //like in Bangladesh country code '880'
+        
 
 
 
@@ -218,22 +229,3 @@ public class Main {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
