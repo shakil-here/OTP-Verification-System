@@ -12,7 +12,9 @@ import java.util.Scanner;
 public class Main {
 
     public static void main(String[] args) throws SQLException {
-
+        final String url = "YOUR_JDBC_SERVER_HOST_LINK";
+        final String userName = "YOUR_USER_NAME";
+        final String password = "YOUR_PASSWORD";
 
         String mobile;
         Scanner scanner = new Scanner(System.in);
@@ -184,6 +186,9 @@ public class Main {
     public static int sendOTPSMS(String otp, String mobile) throws SQLException {
         String message="Your OTP Code is : "+otp;
         String to= "88"+mobile;
+
+        final String API_URL = "YOUR_SMS_API_URL/ENDPOINT";
+        final String API_KEY = "YOUR_SMS_API_KEY";
 
 
 
